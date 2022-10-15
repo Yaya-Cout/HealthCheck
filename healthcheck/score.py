@@ -107,7 +107,7 @@ def calculate(score_list, config):
             # because the score is reversed after the calculation.
             if average_with_current_test < actual_average:
                 # For the logging, we need to invert the score if needed
-                if config["global"]["score"]["lower_is_better"]:
+                if not config["global"]["score"]["lower_is_better"]:
                     average_with_current_test = 100 - average_with_current_test
                     actual_average = 100 - actual_average
                 logger.debug("Test %s ignored because it would increase the "
