@@ -35,11 +35,6 @@ class Test:
         """Run the test."""
         logger.debug("Running test: %s", __name__)
 
-        # Get the CPU load
-        cpu_load = psutil.cpu_percent(
-            interval=self.config["cpu_test_duration"]
-        )
-
         # Return the CPU load
-        return cpu_load
+        return psutil.cpu_percent(interval=self.config["cpu_test_duration"])
 
