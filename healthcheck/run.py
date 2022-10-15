@@ -24,7 +24,7 @@ import healthcheck.score
 # Import the tests
 import healthcheck.tests.command
 import healthcheck.tests.cpu
-import healthcheck.tests.memory
+import healthcheck.tests.ram
 import healthcheck.tests.load
 
 # Set up logging
@@ -35,7 +35,7 @@ logger.debug("Loading module: %s from %s", __name__, __file__)
 
 TESTS = {
     "cpu": healthcheck.tests.cpu.Test,
-    "memory": healthcheck.tests.memory.Test,
+    "ram": healthcheck.tests.ram.Test,
     "load": healthcheck.tests.load.Test,
 }
 

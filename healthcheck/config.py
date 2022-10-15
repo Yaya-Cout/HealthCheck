@@ -59,8 +59,8 @@ DEFAULT_CONFIG = {
             "coeff": 2,
             "cpu_test_duration": 1,
         },
-        "memory": {
-            "type": "memory",
+        "ram": {
+            "type": "ram",
             "coeff": 2,
         },
     },
@@ -68,7 +68,7 @@ DEFAULT_CONFIG = {
     "checks_to_perform": [
         "load",
         "cpu",
-        "memory",
+        "ram",
         "disk",
         "users",
         "processes",
