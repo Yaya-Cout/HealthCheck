@@ -40,6 +40,39 @@ TESTS = {
 }
 
 
+def run_check(test_to_perform, test_config):
+    """Run a single check."""
+    # Get if test has command field
+    if "command" in test_config:
+        # Run the command test
+        test = healthcheck.tests.command.Test(
+            test_to_perform,
+            test_config["command"],
+            test_config["command_run_language"],
+            test_config.get("regex", None),
+        )
+        result = test.run()
+    elif "type" in test_config:
+        # Get if the test type is valid
+        if test_config["type"] not in TESTS:
+            logger.warning("Invalid test type: %s", test_config["type"])
+            return False
+        # Run the test
+        test = TESTS[test_config["type"]](test_config)
+        result = test.run()
+    else:
+        logger.warning("Invalid test config: %s", test_config)
+        return False
+
+    # Check the result
+    if result:
+        logger.info("Test passed: %s; Output: %s", test_to_perform, result)
+        return result
+    else:
+        logger.warning("Test failed: %s", test_to_perform)
+        return False
+
+
 def run(config):
     """Run the health check."""
     # Initialize the score dictionary
@@ -49,44 +82,17 @@ def run(config):
     for test_to_perform in config["checks_to_perform"]:
         # Ensure the test config exists
         if test_to_perform not in config["checks"]:
-            logger.error("Test config not found: %s", test_to_perform)
+            logger.warning("Test config not found: %s", test_to_perform)
             continue
 
-        # Get the test config
-        test_config = config["checks"][test_to_perform]
-
-        # Get if test has command field
-        if "command" in test_config:
-            # Run the command test
-            test = healthcheck.tests.command.Test(
-                test_to_perform,
-                test_config["command"],
-                test_config["command_run_language"],
-                test_config.get("regex", None),
-            )
-            result = test.run()
-        elif "type" in test_config:
-            # Get if the test type is valid
-            if test_config["type"] not in TESTS:
-                logger.error("Invalid test type: %s", test_config["type"])
-                continue
-            # Run the test
-            test = TESTS[test_config["type"]](test_config)
-            result = test.run()
-        else:
-            logger.error("Invalid test config: %s", test_config)
-            continue
+        # Run the test
+        result = run_check(test_to_perform, config["checks"][test_to_perform])
 
         # Check the result
-        if result:
-            logger.info("Test passed: %s; Output: %s", test_to_perform, result)
-            score[test_to_perform] = {
-                "score": result,
-                "config": test_config,
-            }
-        else:
-            logger.error("Test failed: %s", test_to_perform)
-            return False
+        score[test_to_perform] = {
+            "score": result or 0,
+            "config": config["checks"][test_to_perform]
+        }
 
     # Calculate the score
     score = healthcheck.score.calculate(score, config)
