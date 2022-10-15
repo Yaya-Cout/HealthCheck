@@ -1,0 +1,8 @@
+# Pycache
+__pycache__/
+
+# VSCode
+.vscode/
+
+# Config file
+/healthcheck.yml
