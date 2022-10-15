@@ -53,9 +53,9 @@ class Test:
                 env={"LANG": self.command_run_language}
             )
         except subprocess.CalledProcessError as error:
-            logger.error("Command failed with error code: %s",
+            logger.warning("Command failed with error code: %s",
                          error.returncode)
-            logger.error("Command output: %s", error.output)
+            logger.warning("Command output: %s", error.output)
             return False
 
         # Convert the output to a string
@@ -64,14 +64,13 @@ class Test:
         if self.regex:
             # Iterate over the regexes
             for regex in self.regex:
-                match = re.search(regex, output)
-                if not match:
-                    logger.error("Regex not found: %s", regex)
-                    return False
-                else:
-                    output = match.group(0)
+                if match := re.search(regex, output):
+                    output = match[0]
                     logger.debug("Regex found: %s; output: %s", regex, output)
 
+                else:
+                    logger.error("Regex not found: %s", regex)
+                    return False
         # Parse the output to a float
         try:
             output = float(output)
@@ -81,12 +80,3 @@ class Test:
 
         # Return the output
         return output
-
-        # logger.debug("Regex: %s", self.regex)
-        # # if match := self.regex.search(output):
-        # if match := re.search(self.regex, output):
-        #     logger.debug("Regex matched: %s", match[0])
-        #     return match[0]
-        # else:
-        #     logger.error("No match found")
-        #     return False
