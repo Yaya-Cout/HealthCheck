@@ -76,7 +76,7 @@ def run_check(test_to_perform, test_config):
 def run(config):
     """Run the health check."""
     # Initialize the score dictionary
-    score = {}
+    score_list = {}
 
     # Run the tests
     for test_to_perform in config["checks_to_perform"]:
@@ -89,16 +89,17 @@ def run(config):
         result = run_check(test_to_perform, config["checks"][test_to_perform])
 
         # Check the result
-        score[test_to_perform] = {
+        score_list[test_to_perform] = {
             "score": result or 0,
             "config": config["checks"][test_to_perform]
         }
 
     # Calculate the score
-    score = healthcheck.score.calculate(score, config)
+    score_list = healthcheck.score.calculate(score_list, config)
 
     # Log the score
-    logger.info("Score: %s", score)
+    logger.info("Score: %s", score_list)
 
     # Return the score
-    return score
+    return score_list
+
