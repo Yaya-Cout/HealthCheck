@@ -23,7 +23,7 @@ DEFAULT_CONFIG = {
     # Default configuration, to avoid very long checks definitions
     "default_checks_config": {
         "coeff": 1,
-        "check_interval": 60,
+        "check_interval": 10,
         "check_timeout": 10,
         "min": 0,
         "max": 100,

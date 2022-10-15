@@ -17,15 +17,10 @@
 
 # Standard library imports
 import logging
+import asyncio
 
-# Import the score calculation function
-import healthcheck.score
-
-# Import the tests
-import healthcheck.tests.command
-import healthcheck.tests.cpu
-import healthcheck.tests.ram
-import healthcheck.tests.load
+# Import dbus daemon
+import healthcheck.dbus_daemon
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -33,73 +28,19 @@ logger = logging.getLogger(__name__)
 # Log the loading of the run module
 logger.debug("Loading module: %s from %s", __name__, __file__)
 
-TESTS = {
-    "cpu": healthcheck.tests.cpu.Test,
-    "ram": healthcheck.tests.ram.Test,
-    "load": healthcheck.tests.load.Test,
-}
 
+def dbus_main(config):
+    """Create and run the DBus service."""
+    # Create the DBus service
+    service = healthcheck.dbus_daemon.Service(config)
 
-def run_check(test_to_perform, test_config):
-    """Run a single check."""
-    # Get if test has command field
-    if "command" in test_config:
-        # Run the command test
-        test = healthcheck.tests.command.Test(
-            test_to_perform,
-            test_config["command"],
-            test_config["command_run_language"],
-            test_config.get("regex", None),
-        )
-        result = test.run()
-    elif "type" in test_config:
-        # Get if the test type is valid
-        if test_config["type"] not in TESTS:
-            logger.warning("Invalid test type: %s", test_config["type"])
-            return False
-        # Run the test
-        test = TESTS[test_config["type"]](test_config)
-        result = test.run()
-    else:
-        logger.warning("Invalid test config: %s", test_config)
-        return False
-
-    # Check the result
-    if result:
-        logger.info("Test passed: %s; Output: %s", test_to_perform, result)
-        return result
-    else:
-        logger.warning("Test failed: %s", test_to_perform)
-        return False
+    # Run the DBus service
+    service.run()
 
 
 def run(config):
     """Run the health check."""
-    # Initialize the score dictionary
-    score_list = {}
-
-    # Run the tests
-    for test_to_perform in config["checks_to_perform"]:
-        # Ensure the test config exists
-        if test_to_perform not in config["checks"]:
-            logger.warning("Test config not found: %s", test_to_perform)
-            continue
-
-        # Run the test
-        result = run_check(test_to_perform, config["checks"][test_to_perform])
-
-        # Check the result
-        score_list[test_to_perform] = {
-            "score": result or 0,
-            "config": config["checks"][test_to_perform]
-        }
-
-    # Calculate the score
-    score_list = healthcheck.score.calculate(score_list, config)
-
-    # Log the score
-    logger.info("Score: %s", score_list)
-
-    # Return the score
-    return score_list
-
+    # Log the start of the health check
+    logger.info("Starting health check")
+    # Run dbus_main
+    dbus_main(config)
