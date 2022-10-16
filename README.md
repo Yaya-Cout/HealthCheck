@@ -49,8 +49,40 @@ dbus-send --session --print-reply --dest=org.healthcheck /org/healthcheck org.he
 To get only the health score, you can run:
 
 ```shell
-dbus-send --session --print-reply --dest=org.healthcheck /org/healthcheck org.healthcheck.Score.get_score | tail -n 1 | awk '{print $2}'
+echo $(dbus-send --session --print-reply --dest=org.healthcheck /org/healthcheck org.healthcheck.Score.get_score 2>/dev/null || echo '-1') | tail -n 1 | awk '{print $NF}'
 ```
+
+To integrate this in your PowerLevel10k prompt, you can add the following
+segment to your `~/.p10k.zsh`:
+
+```zsh
+# Health Check
+function prompt_healthcheck() {
+    local health_score="$(echo $(dbus-send --session --print-reply --dest=org.healthcheck /org/healthcheck org.healthcheck.Score.get_score 2>/dev/null || echo '-1') | tail -n 1 | awk '{print $NF}')"
+    # If health score is -1, then healthcheck is not running, so don't show anything
+    if (( health_score == -1 )); then
+        return
+    fi
+    # The health score is a number between 0 and 100 (100 being the best), so
+    # we can use it to determine the color of the segment
+    # In normal use, the score is between 60 and 80, so we'll use that as the
+    # threshold for the colors
+    if (( health_score >= 80 )); then
+        p10k segment -s HEALTHY -f green -i '🏥' -t "${health_score}"
+    elif (( health_score >= 60 )); then
+        p10k segment -s OK -f 248 -i '🏥' -t "${health_score}"
+    elif (( health_score >= 40 )); then
+        p10k segment -s WARNING -f yellow -i '🏥' -t "${health_score}"
+    elif (( health_score >= 20 )); then
+        p10k segment -s DANGER -f red -i '🏥' -t "${health_score}"
+    else
+        p10k segment -s CRITICAL -f red -i '🏥' -t "${health_score}"
+    fi
+}
+```
+
+and then add `prompt_healthcheck` to your `POWERLEVEL9K_LEFT_PROMPT_ELEMENTS`
+or `POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS`.
 
 ### Python
 
