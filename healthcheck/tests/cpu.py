@@ -37,4 +37,3 @@ class Test:
 
         # Return the CPU load
         return psutil.cpu_percent(interval=self.config["cpu_test_duration"])
-

@@ -126,7 +126,6 @@ class Service(dbus.service.Object):
         """Run the tests that are needed."""
         self._test_manager.run_needed()
 
-
     @dbus.service.method(
         f"{BUS_NAME}.Score",
         in_signature='',
