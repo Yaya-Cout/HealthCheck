@@ -28,6 +28,8 @@ import healthcheck.tests.command
 import healthcheck.tests.cpu
 import healthcheck.tests.ram
 import healthcheck.tests.load
+import healthcheck.tests.disk_usage
+import healthcheck.tests.disk_io
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -39,6 +41,8 @@ TESTS = {
     "cpu": healthcheck.tests.cpu.Test,
     "ram": healthcheck.tests.ram.Test,
     "load": healthcheck.tests.load.Test,
+    "disk_usage": healthcheck.tests.disk_usage.Test,
+    "disk_io": healthcheck.tests.disk_io.Test,
 }
 
 

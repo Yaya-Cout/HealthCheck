@@ -63,13 +63,25 @@ DEFAULT_CONFIG = {
             "type": "ram",
             "coeff": 2,
         },
+        "disk_usage": {
+            "type": "disk_usage",
+            "coeff": 2,
+            "ignore_if_up_average": True,
+            "disk_test_path": "/",
+        },
+        "disk_io": {
+            "type": "disk_io",
+            "coeff": 2,
+            "ignore_if_up_average": True,
+        },
     },
     # Here we define the checks to be performed
     "checks_to_perform": [
         "load",
         "cpu",
         "ram",
-        "disk",
+        "disk_usage",
+        # "disk_io",
         "users",
         "processes",
     ],
