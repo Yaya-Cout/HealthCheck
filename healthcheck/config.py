@@ -18,6 +18,14 @@
 # Standard library imports
 import os
 import yaml
+import logging
+
+# Set up logging
+logger = logging.getLogger(__name__)
+
+# Log the loading of the config module
+logger.debug("Loading module: %s from %s", __name__, __file__)
+
 
 DEFAULT_CONFIG = {
     # Default configuration, to avoid very long checks definitions
@@ -104,6 +112,16 @@ def replace_default_config(config, default_config):
         # If the key is not in the configuration, add it
         if key not in config:
             config[key] = value
+
+        # Check if the type of the value is the same as the default value, and
+        # if not, replace it and print a warning
+        elif not isinstance(config[key], type(value)):
+            logger.warning(
+                "The value of the key '%s' is not valid, replacing it with the"
+                " default value.", key
+            )
+            config[key] = value
+
         # If the value is a dict, call the function recursively
         elif isinstance(value, dict):
             config[key] = replace_default_config(config[key], value)
