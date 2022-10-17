@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class Test:
-    """Special test class that run commands."""
+    """Test class that is used as a template for new tests."""
 
     def __init__(self, config):
         """Initialize the test."""

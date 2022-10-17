@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class Test:
-    """Special test class that run commands."""
+    """Test class that checks the memory usage."""
 
     def __init__(self, config):
         """Initialize the test."""
