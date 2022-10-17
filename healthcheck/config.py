@@ -73,6 +73,7 @@ DEFAULT_CONFIG = {
             "type": "disk_io",
             "coeff": 2,
             "ignore_if_up_average": True,
+            "compare_interval": 60,
         },
     },
     # Here we define the checks to be performed
@@ -81,7 +82,7 @@ DEFAULT_CONFIG = {
         "cpu",
         "ram",
         "disk_usage",
-        # "disk_io",
+        "disk_io",
         "users",
         "processes",
     ],

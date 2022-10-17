@@ -29,6 +29,8 @@ class Test:
     def __init__(self, config):
         """Initialize the test."""
         self.config = config
+        self.last_run_list = []
+
         logger.debug("Initializing test: %s", __name__)
 
     def run(self):
@@ -38,12 +40,17 @@ class Test:
         # Get the disk I/O data
         disk_io = psutil.disk_io_counters(perdisk=False)
 
-        # TODO: When tests instances of tests will be reusuable, we need to
-        #       store the previous disk I/O data and calculate the difference
-        #       between the current and previous data using the time difference
-        #       specified in the configuration file and return the difference
-        #       instead of the current data. That's why this test is not
-        #       enabled by default yet.
+        # Add the read and write data to get the total
+        total = disk_io.read_bytes + disk_io.write_bytes
 
-        # Return the disk I/O data
-        return disk_io.read_bytes + disk_io.write_bytes
+        # Add the total to the last run list
+        self.last_run_list.append(total)
+
+        # Remove the oldest entry if the list is too long
+        compare_interval = self.config["compare_interval"]
+        check_interval = self.config["check_interval"]
+        while len(self.last_run_list) > compare_interval / check_interval:
+            self.last_run_list.pop(0)
+
+        # Return the average
+        return sum(self.last_run_list) / len(self.last_run_list)
