@@ -137,8 +137,5 @@ def calculate(score_list, config):
     # Calculate the global score
     score_percentage = _global_score(score, config)
 
-    # Log the score
-    logger.debug("Score: %s", score_percentage)
-
     # Return the score
     return score_percentage
