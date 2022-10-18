@@ -62,7 +62,7 @@ class Test:
         # output = output.decode("utf-8")
 
         if self.regex:
-            # Iterate over the regexes
+            # Iterate over regex
             for regex in self.regex:
                 if match := re.search(regex, output):
                     output = match[0]

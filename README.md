@@ -1,4 +1,4 @@
-# Helth Check
+# Health Check
 
 Health Check is a simple tool that runs a series of tests to check the health
 of your system. It returns a system health score and a list of failed tests.
