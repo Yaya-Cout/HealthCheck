@@ -178,7 +178,6 @@ class TestManager:
     def run_needed(self):
         """Run tests that need to be re-run."""
         # Disable logging for this function (it's called a lot)
-        last_level = logger.getEffectiveLevel()
         logging.disable(logging.CRITICAL)
 
         # Check if the manager is ready
@@ -227,8 +226,8 @@ class TestManager:
         # Log the score
         logger.info("Score: %s", self.score)
 
-        # Restore logging
-        logging.disable(last_level)
+        # Restore the logging level
+        logging.disable(logging.NOTSET)
 
         # Return the score
         return self.score
