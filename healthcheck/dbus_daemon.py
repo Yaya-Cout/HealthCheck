@@ -170,19 +170,8 @@ class Service(dbus.service.Object):
         # Set the config
         self._config = healthcheck.config.set_path(self._config, path, value)
 
-        # Reload the test manager
-        # TODO: Tell the test manager to reload the config instead of
-        #       reinitializing it. This will allow the test manager to reload
-        #       only the tests that need to be reloaded, and even telling the
-        #       tests to reload their config if they need to.
-        self._test_manager = healthcheck.test_manager.TestManager(self._config)
-
-        # Run the tests that are needed
-        self._test_manager.run_all()
-
-        # Add the run_needed method to the gobject loop (pointer has changed,
-        # even if the object name is the same)
-        gobject.idle_add(self._test_manager.run_needed)
+        # Save the config in the test manager
+        self._test_manager.set_config(self._config)
 
     @dbus.service.method(
         f"{BUS_NAME}.Quit",

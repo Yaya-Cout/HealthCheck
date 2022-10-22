@@ -239,3 +239,18 @@ class TestManager:
     def reload_score(self):
         """Reload the score."""
         self.score = healthcheck.score.calculate(self.test_data, self.config)
+
+    def set_config(self, config):
+        """Set the config."""
+        # Set the config
+        self.config = config
+
+        # Reset the test data and instances
+        # TODO: Only reset the test data and instances that are not in the new
+        #       config
+        self.test_data = {}
+        self.test_instances = {}
+
+        # We don't need to reload the score, because the score will be
+        # reloaded when the tests are run (run_needed) which is called
+        # periodically
