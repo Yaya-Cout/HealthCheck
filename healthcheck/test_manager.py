@@ -69,6 +69,10 @@ class TestManager:
 
     def run_check_real(self, test_to_perform):
         """Run a single check."""
+        # Check if the test config exists
+        if test_to_perform not in self.config["checks"]:
+            logger.warning("Test config not found: %s", test_to_perform)
+            return False
         # Get the config
         test_config = self.config["checks"][test_to_perform]
 
@@ -117,6 +121,11 @@ class TestManager:
 
     def run_check(self, test_to_perform):
         """Wrap the check run to catch exceptions and update test data."""
+        # Ensure that the test config exists
+        if test_to_perform not in self.config["checks"]:
+            logger.warning("Test config not found: %s", test_to_perform)
+            return False
+
         # Run the test
         try:
             result = self.run_check_real(test_to_perform)
@@ -146,11 +155,6 @@ class TestManager:
 
         # Run the tests
         for test_to_perform in self.config["checks_to_perform"]:
-            # Ensure the test config exists
-            if test_to_perform not in self.config["checks"]:
-                logger.warning("Test config not found: %s", test_to_perform)
-                continue
-
             # Run the test
             if not self.run_check(test_to_perform):
                 # If the test failed, don't set the score, and remove the test

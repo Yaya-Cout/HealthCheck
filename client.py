@@ -22,6 +22,7 @@ import dbus
 BUS_NAME = "org.healthcheck"
 OBJECT_PATH = "/org/healthcheck"
 
+
 class Client():
     """The DBus client for the Health Check."""
 
@@ -48,6 +49,14 @@ class Client():
             "get_score",
             f"{BUS_NAME}.Score"
         )
+        self.get_config = service.get_dbus_method(
+            "get_config",
+            f"{BUS_NAME}.Config"
+        )
+        self.set_config = service.get_dbus_method(
+            "set_config",
+            f"{BUS_NAME}.Config"
+        )
         self.quit = service.get_dbus_method("quit", f"{BUS_NAME}.Quit")
 
     def run(self):
@@ -56,6 +65,20 @@ class Client():
         score = self.get_score()
         # Print the score
         print(f"Score: {score}")
+        # Call all API methods to test them
+        self.run_all()
+        self.run_check("disk")
+        self.run_needed()
+        print("Config:")
+        print(self.get_config("disk"))
+        print(self.get_config("."))
+        print(self.get_config("/checks/disk_usage"))
+        self.set_config("/checks/disk_usage/disk_test_path", "/tmp")
+        print(self.get_config("/checks/disk_usage/disk_test_path"))
+        self.set_config("/checks/disk_usage/disk_test_path", "/")
+        print(self.get_config("/checks/disk_usage/disk_test_path"))
+        # Quit the DBus service
+        self.quit()
 
 
 if __name__ == "__main__":

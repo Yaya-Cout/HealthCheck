@@ -17,7 +17,7 @@
 
 # Standard library imports
 import logging
-import asyncio
+import json
 
 # Import dbus and gobject
 import dbus
@@ -33,6 +33,7 @@ except ImportError:
 
 # Import healthcheck modules
 import healthcheck.test_manager
+import healthcheck.config
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -138,6 +139,50 @@ class Service(dbus.service.Object):
 
         # Return the score
         return self._test_manager.score
+
+    @dbus.service.method(
+        f"{BUS_NAME}.Config",
+        # We take a string as input (path to the part of the config we want)
+        in_signature='s',
+        out_signature='s',
+    )
+    def get_config(self, path):
+        """Get the config."""
+        # Log the getting of the config
+        logger.debug("Getting config")
+
+        # Get the config
+        config = healthcheck.config.parse_path(self._config, path)[1]
+
+        # Return the config
+        return json.dumps(config)
+
+    @dbus.service.method(
+        f"{BUS_NAME}.Config",
+        in_signature='ss',
+        out_signature='',
+    )
+    def set_config(self, path, value):
+        """Set the config."""
+        # Log the setting of the config
+        logger.debug("Setting config")
+
+        # Set the config
+        self._config = healthcheck.config.set_path(self._config, path, value)
+
+        # Reload the test manager
+        # TODO: Tell the test manager to reload the config instead of
+        #       reinitializing it. This will allow the test manager to reload
+        #       only the tests that need to be reloaded, and even telling the
+        #       tests to reload their config if they need to.
+        self._test_manager = healthcheck.test_manager.TestManager(self._config)
+
+        # Run the tests that are needed
+        self._test_manager.run_all()
+
+        # Add the run_needed method to the gobject loop (pointer has changed,
+        # even if the object name is the same)
+        gobject.idle_add(self._test_manager.run_needed)
 
     @dbus.service.method(
         f"{BUS_NAME}.Quit",

@@ -17,8 +17,9 @@
 
 # Standard library imports
 import os
-import yaml
 import logging
+
+import yaml
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -159,3 +160,60 @@ def init(config_file):
     with open(config_file, "w") as config_file:
         # Dump the default configuration with YAML formatting
         yaml.dump(DEFAULT_CONFIG, config_file, default_flow_style=False)
+
+
+def parse_path(config, path):
+    """Parse a path in the configuration file."""
+    # Replace slashes with dots
+    path = path.replace("/", ".")
+    # Remove the dots at the beginning and end
+    path = path.strip(".")
+    # If the path is empty or is just a dot, return the whole config
+    if path in ["", "."]:
+        return "", config
+
+    # Else, split the path into a list and parse the config
+    path = path.split(".")
+
+    # Get the config
+    for key in path:
+        # Ensure the key exists
+        if key not in config:
+            logger.warning("Path %s does not exist in config", path)
+            return "", {}
+
+        # Get the next part of the config
+        # In case of a dict that return a value, we should return the
+        # key, not the value
+        if isinstance(config[key], (dict, list)):
+            config = config[key]
+        else:
+            config = config.get(key)
+    return path, config
+
+
+def set_path(config, path, value):
+    """Set a value in the configuration file."""
+    # Parse the path
+    path = parse_path(config, path)[0]
+
+    # Return the new config
+    return _set_config(config, path, value)
+
+
+def _set_config(config, path: list[str | list], value):
+    """Set a value in the configuration file."""
+    # If the path is only one element, set the value
+    if len(path) == 1:
+        config[path[0]] = value
+        return config
+
+    # Else, get the next part of the path
+    key = path.pop(0)
+
+    # Assert the key exists (should be done when parsing the path)
+    assert key in config
+
+    # Set the value in the next part of the config
+    config[key] = _set_config(config[key], path, value)
+    return config
