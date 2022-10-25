@@ -17,7 +17,7 @@
 
 # Standard library imports
 import logging
-# import asyncio
+import copy
 import time
 
 # Import the score calculation function
@@ -51,8 +51,9 @@ class TestManager:
 
     def __init__(self, config):
         """Initialize the class."""
-        # Save the config
-        self.config = config
+        # Save the config (we use a copy, because we don't want for the config
+        # to be modified by the dbus daemon)
+        self.config = copy.deepcopy(config)
 
         # Create the test data
         self.test_data = {}
@@ -242,15 +243,27 @@ class TestManager:
 
     def set_config(self, config):
         """Set the config."""
-        # Set the config
-        self.config = config
+        # Reset the test data and instances that are edited by the config
+        # We don't care about default checks config, because it's copied to the
+        # checks specific config. This way, we have only to check the checks
+        # specific config.
+        for test in self.config["checks"]:
+            # Compare with the new config
+            if test in config["checks"] and \
+                    self.config["checks"][test] == config["checks"][test]:
+                # If the config is the same, don't reset the test data
+                logger.debug("Test config is the same: %s", test)
+                continue
+            logger.info("Resetting test data for: %s", test)
+            # Else, reset the test data and instance
+            if test in self.test_data:
+                del self.test_data[test]
+            else:
+                logger.debug("Test data not found: %s", test)
+            if test in self.test_instances:
+                del self.test_instances[test]
+            else:
+                logger.debug("Test instance not found: %s", test)
 
-        # Reset the test data and instances
-        # TODO: Only reset the test data and instances that are not in the new
-        #       config
-        self.test_data = {}
-        self.test_instances = {}
-
-        # We don't need to reload the score, because the score will be
-        # reloaded when the tests are run (run_needed) which is called
-        # periodically
+        # Save the new config
+        self.config = copy.deepcopy(config)
